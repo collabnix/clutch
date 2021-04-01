@@ -1,4 +1,5 @@
 import React from "react";
+import { useSearchParams } from "react-router-dom";
 import styled from "@emotion/styled";
 import _ from "lodash";
 
@@ -75,7 +76,7 @@ const Resolver: React.FC<ResolverProps> = ({
     const inputData = _.mapValues(data, v => (_.isString(v) && _.trim(v)) || v);
 
     // Resolve!
-    resolveResource(
+    return resolveResource(
       type,
       searchLimit,
       inputData,
@@ -90,6 +91,21 @@ const Resolver: React.FC<ResolverProps> = ({
       apiPackage
     );
   };
+
+  const [searchParams, ,] = useSearchParams();
+  React.useEffect(() => {
+    let isMounted = true;
+    if (searchParams.get("rq")) {
+      submitHandler({ query: searchParams.get("rq") }).then(() => {
+        if (isMounted) {
+          return true;
+        }
+      });
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, []);
 
   return (
     <Loadable isLoading={state.schemasLoading}>
